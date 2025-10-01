@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Avalanche Effect Research - Feistel Network</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <div id="notifications" class="notifications-container"></div>
+    <div class="container">
+      <header>
+        <h1 class="title">Avalanche Effect Research</h1>
+      </header>
+
+      <main>
+        <section class="cipher-section">
+          <div class="back-button-container">
+            <button id="backBtn" class="btn clear">← Back to Main</button>
+          </div>
+
+          <div class="input-group">
+            <label for="originalText">Original Text</label>
+            <textarea id="originalText" readonly></textarea>
+          </div>
+
+          <div class="input-group">
+            <label for="originalKey">Original Key</label>
+            <input type="text" id="originalKey" readonly />
+          </div>
+
+          <div class="research-controls">
+            <div class="input-group">
+              <label for="bitPosition">Bit Position to Change (1-based)</label>
+              <input type="number" id="bitPosition" min="1" value="1" />
+            </div>
+
+            <div class="input-group">
+              <label class="mode-label">Change Target</label>
+              <div class="mode-toggle">
+                <input
+                  type="radio"
+                  id="changeText"
+                  name="target"
+                  value="text"
+                  checked
+                />
+                <label for="changeText" class="mode-option">Text</label>
+                <input type="radio" id="changeKey" name="target" value="key" />
+                <label for="changeKey" class="mode-option">Key</label>
+              </div>
+            </div>
+
+            <div class="input-group">
+              <label for="rounds">Rounds</label>
+              <input
+                type="number"
+                id="rounds"
+                min="1"
+                max="16"
+                value="4"
+                readonly
+              />
+            </div>
+
+            <div class="input-group">
+              <label for="functionType">F Function Type</label>
+              <input type="text" id="functionType" readonly />
+            </div>
+          </div>
+
+          <div class="controls">
+            <button id="startResearchBtn" class="btn primary">
+              Start Research
+            </button>
+            <button id="clearResultsBtn" class="btn clear">
+              Clear Results
+            </button>
+            <button id="exportDataBtn" class="btn avalanche">
+              Export Data
+            </button>
+          </div>
+
+          <div class="results-section">
+            <div class="results-grid">
+              <div class="results-panel">
+                <h3>Round-by-Round Analysis</h3>
+                <div id="roundResults" class="round-results"></div>
+              </div>
+
+              <div class="results-panel">
+                <h3>Changed Bits Graph</h3>
+                <div class="chart-container">
+                  <canvas id="avalancheChart"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <div class="summary-panel">
+              <h3>Summary Statistics</h3>
+              <div id="summaryStats" class="summary-stats">
+                <div class="stat-item">
+                  <span class="stat-label">Total Bits</span>
+                  <span class="stat-value" id="totalBits">-</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Average Changed</span>
+                  <span class="stat-value" id="avgChanged">-</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Max Changed</span>
+                  <span class="stat-value" id="maxChanged">-</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Min Changed</span>
+                  <span class="stat-value" id="minChanged">-</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Avalanche Ratio</span>
+                  <span class="stat-value" id="avalancheRatio">-</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="avalanche.js"></script>
+  </body>
+</html>
