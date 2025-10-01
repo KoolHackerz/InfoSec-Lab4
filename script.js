@@ -335,6 +335,151 @@ class FeistelCipher {
     this.els.downloadBtn.disabled = processing;
   }
 
+  createZvhFile(encryptedData, metadata) {
+    const header = new Uint8Array([0x5A, 0x56, 0x48, 0x01]); // "ZVH" + версія
+    
+    const metadataStr = JSON.stringify(metadata);
+    const metadataBytes = new TextEncoder().encode(metadataStr);
+    const metadataLength = new Uint32Array([metadataBytes.length]);
+    
+    const encryptedBytes = new TextEncoder().encode(encryptedData);
+    const dataLength = new Uint32Array([encryptedBytes.length]);
+    
+    const totalSize = header.length + 4 + metadataBytes.length + 4 + encryptedBytes.length;
+    const result = new Uint8Array(totalSize);
+    
+    let offset = 0;
+    
+    result.set(header, offset);
+    offset += header.length;
+    
+    result.set(new Uint8Array(metadataLength.buffer), offset);
+    offset += 4;
+    
+    result.set(metadataBytes, offset);
+    offset += metadataBytes.length;
+    
+    result.set(new Uint8Array(dataLength.buffer), offset);
+    offset += 4;
+    
+    result.set(encryptedBytes, offset);
+    
+    return result;
+  }
+
+  parseZvhFile(arrayBuffer) {
+    const data = new Uint8Array(arrayBuffer);
+    let offset = 0;
+    
+    if (data.length < 12) {
+      throw new Error('File too small to be a valid ZVH file');
+    }
+    
+    const header = data.slice(0, 4);
+    if (header[0] !== 0x5A || header[1] !== 0x56 || header[2] !== 0x48) {
+      throw new Error('Invalid ZVH file format: wrong magic number');
+    }
+    
+    const version = header[3];
+    if (version !== 0x01) {
+      throw new Error(`Unsupported ZVH file version: ${version}`);
+    }
+    
+    offset = 4;
+    
+    if (offset + 4 > data.length) {
+      throw new Error('Invalid ZVH file: incomplete metadata length');
+    }
+    
+    const metadataLength = new DataView(data.buffer, offset, 4).getUint32(0, true);
+    offset += 4;
+    
+    if (metadataLength > 1024 * 1024 || metadataLength === 0) {
+      throw new Error('Invalid metadata length in ZVH file');
+    }
+    
+    if (offset + metadataLength > data.length) {
+      throw new Error('Invalid ZVH file: incomplete metadata');
+    }
+    
+    const metadataBytes = data.slice(offset, offset + metadataLength);
+    let metadata;
+    
+    try {
+      const metadataStr = new TextDecoder().decode(metadataBytes);
+      metadata = JSON.parse(metadataStr);
+    } catch (e) {
+      throw new Error('Invalid ZVH file: corrupted metadata');
+    }
+    
+    if (!metadata.version) {
+      throw new Error('Invalid ZVH file: missing required metadata fields');
+    }
+    
+    offset += metadataLength;
+    
+    if (offset + 4 > data.length) {
+      throw new Error('Invalid ZVH file: incomplete data length');
+    }
+    
+    const dataLength = new DataView(data.buffer, offset, 4).getUint32(0, true);
+    offset += 4;
+    
+    if (dataLength > 10 * 1024 * 1024 || dataLength === 0) {
+      throw new Error('Invalid data length in ZVH file');
+    }
+    
+    if (offset + dataLength > data.length) {
+      throw new Error('Invalid ZVH file: incomplete encrypted data');
+    }
+    
+    const encryptedBytes = data.slice(offset, offset + dataLength);
+    let encryptedData;
+    
+    try {
+      encryptedData = new TextDecoder().decode(encryptedBytes);
+    } catch (e) {
+      throw new Error('Invalid ZVH file: corrupted encrypted data');
+    }
+    
+    const base64Pattern = /^[A-Za-z0-9+/]+=*$/;
+    if (!base64Pattern.test(encryptedData)) {
+      throw new Error('Invalid ZVH file: encrypted data is not in base64 format');
+    }
+    
+    return { metadata, encryptedData };
+  }
+
+  downloadEncryptedFile(encryptedData, key, rounds, functionType) {
+    try {
+      const metadata = {
+        version: "1.0",
+        timestamp: new Date().toISOString()
+      };
+      
+      const zvhData = this.createZvhFile(encryptedData, metadata);
+      
+      const blob = new Blob([zvhData], { type: "application/octet-stream" });
+      const url = window.URL.createObjectURL(blob);
+      
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `encrypted_${Date.now()}.zvh`;
+      link.style.display = "none";
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      window.URL.revokeObjectURL(url);
+      
+      this.showNotification("Downloaded encrypted ZVH file", "success");
+    } catch (error) {
+      this.showNotification("Failed to create ZVH file: " + error.message, "error");
+      console.error("ZVH creation error:", error);
+    }
+  }
+
   handleDownload() {
     const result = this.els.result.value.trim();
 
@@ -345,34 +490,79 @@ class FeistelCipher {
 
     try {
       const isEncrypt = this.isEncryptMode;
-      const filename = isEncrypt
-        ? "encrypted_result.txt"
-        : "decrypted_result.txt";
+      
+      if (isEncrypt) {
+        const key = this.els.key.value.trim();
+        const rounds = parseInt(this.els.rounds.value);
+        const functionType = this.currentFunctionType;
+        
+        this.downloadEncryptedFile(result, key, rounds, functionType);
+      } else {
+        const filename = "decrypted_result.txt";
+        const blob = new Blob([result], { type: "text/plain;charset=utf-8" });
+        const url = window.URL.createObjectURL(blob);
 
-      const blob = new Blob([result], { type: "text/plain;charset=utf-8" });
-      const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        link.style.display = "none";
 
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = filename;
-      link.style.display = "none";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
 
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
 
-      window.URL.revokeObjectURL(url);
-
-      this.showNotification(`Downloaded ${filename}`, "success");
+        this.showNotification(`Downloaded ${filename}`, "success");
+      }
     } catch (error) {
       this.showNotification("Failed to download file", "error");
       console.error("Download error:", error);
     }
   }
 
+  handleZvhFileLoad(file) {
+    const reader = new FileReader();
+    
+    reader.onload = (e) => {
+      try {
+        const arrayBuffer = e.target.result;
+        const { metadata, encryptedData } = this.parseZvhFile(arrayBuffer);
+        
+        if (this.isEncryptMode) {
+          this.showNotification("Switch to Decrypt mode to load ZVH files", "error");
+          return;
+        }
+        
+        this.els.plaintext.value = encryptedData;
+        this.updateStats();
+        
+        this.showNotification(`Loaded ZVH file: ${file.name}`, "success");
+        
+      } catch (error) {
+        this.showNotification("Failed to load ZVH file: " + error.message, "error");
+        console.error("ZVH loading error:", error);
+      }
+    };
+    
+    reader.onerror = () => {
+      this.showNotification("Failed to read ZVH file", "error");
+    };
+    
+    reader.readAsArrayBuffer(file);
+  }
+
   handleFileLoad(event) {
     const file = event.target.files[0];
     if (!file) return;
+
+    const fileName = file.name.toLowerCase();
+    
+    if (fileName.endsWith('.zvh')) {
+      this.handleZvhFileLoad(file);
+      event.target.value = "";
+      return;
+    }
 
     const reader = new FileReader();
     reader.onload = (e) => {

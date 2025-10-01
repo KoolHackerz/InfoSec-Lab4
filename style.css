@@ -177,6 +177,11 @@ header {
   color: var(--accent);
 }
 
+.notification.warning {
+  border-color: #ffa502;
+  color: #ffa502;
+}
+
 label {
   display: block;
   margin-bottom: 0.5rem;
