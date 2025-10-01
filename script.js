@@ -16,14 +16,7 @@ class FeistelCipher {
       loadKey: document.getElementById("loadKeyBtn"),
       keyInput: document.getElementById("keyInput"),
       downloadBtn: document.getElementById("downloadBtn"),
-      viz: document.getElementById("visualization"),
       notifications: document.getElementById("notifications"),
-      stats: {
-        input: document.getElementById("inputLength"),
-        output: document.getElementById("outputLength"),
-        rounds: document.getElementById("roundsUsed"),
-        time: document.getElementById("processingTime"),
-      },
     };
 
     this.validationTimers = {
@@ -33,7 +26,6 @@ class FeistelCipher {
 
     this.attachEventListeners();
     this.updateUI();
-    this.updateStats();
   }
 
   attachEventListeners() {
@@ -51,15 +43,11 @@ class FeistelCipher {
 
     this.els.plaintext.oninput = () => {
       this.validateTextInput();
-      this.updateStats();
     };
 
     this.els.key.oninput = () => {
       this.validateKeyInput();
-      this.updateStats();
     };
-
-    this.els.rounds.oninput = () => this.updateStats();
   }
 
   get currentMode() {
@@ -260,8 +248,6 @@ class FeistelCipher {
       const newRight = this.xor(left, f);
 
       [left, right] = [newLeft, newRight];
-
-      this.visualize(i + 1, left, right, rounds);
     }
 
     const finalLeft = right.padStart(32, "0").slice(0, 32);
@@ -278,26 +264,21 @@ class FeistelCipher {
     const isEncrypt = this.isEncryptMode;
 
     if (!text || !key) {
-      this.showMessage("Enter text and key");
+      this.showNotification("Enter text and key", "error");
       return;
     }
 
     this.setProcessing(true);
-    this.showMessage(isEncrypt ? "Encrypting..." : "Decrypting...");
 
     try {
       await new Promise((r) => setTimeout(r, 300));
       const start = performance.now();
 
       const result = await this.processText(text, key, rounds, isEncrypt);
-      const processingTime = performance.now() - start;
 
       this.els.result.value = result;
-      this.updateStats(text.length, result.length, rounds, processingTime);
-
-      setTimeout(() => this.showMessage("Complete"), rounds * 150 + 300);
     } catch (e) {
-      this.showMessage("Error: " + e.message);
+      this.showNotification("Error: " + e.message, "error");
     } finally {
       this.setProcessing(false);
     }
@@ -326,26 +307,6 @@ class FeistelCipher {
     }
   }
 
-  visualize(round, left, right, total) {
-    setTimeout(() => {
-      const functionType = this.isSimpleFunction ? "F(Vi)" : "F(Vi,X)";
-      this.els.viz.innerHTML = `
-        <div class="feistel-round">
-          <div class="data-block"><div>L${round - 1}</div><div>${left.slice(
-        0,
-        6
-      )}...</div></div>
-          <div class="function-box">${functionType}</div>
-          <div class="xor-symbol">⊕</div>
-          <div class="data-block"><div>R${round - 1}</div><div>${right.slice(
-        0,
-        6
-      )}...</div></div>
-          <div style="margin-left: 15px; font-size: 0.75rem; color: var(--text-muted);">${round}/${total}</div>
-        </div>`;
-    }, round * 150);
-  }
-
   clear() {
     this.els.plaintext.value = this.els.key.value = this.els.result.value = "";
     this.els.rounds.value = "4";
@@ -353,21 +314,6 @@ class FeistelCipher {
     this.els.fileInput.value = "";
     this.els.keyInput.value = "";
     this.updateUI();
-    this.showMessage("Ready");
-    this.updateStats();
-  }
-
-  updateStats(inputLen = 0, outputLen = 0, rounds = 0, time = 0) {
-    this.els.stats.input.textContent =
-      inputLen || this.els.plaintext.value.length;
-    this.els.stats.output.textContent =
-      outputLen || this.els.result.value.length;
-    this.els.stats.rounds.textContent = rounds || this.els.rounds.value;
-    this.els.stats.time.textContent = time ? `${time.toFixed(2)}ms` : "0ms";
-  }
-
-  showMessage(msg) {
-    this.els.viz.innerHTML = `<div class="round-display"><div class="round-info">${msg}</div></div>`;
   }
 
   setProcessing(processing) {
@@ -448,7 +394,6 @@ class FeistelCipher {
       }
 
       this.els.plaintext.value = content;
-      this.updateStats();
       this.showNotification(`Loaded ${file.name}`, "success");
     };
 
@@ -495,7 +440,6 @@ class FeistelCipher {
       }
 
       this.els.key.value = cleanKey;
-      this.updateStats();
       this.showNotification(`Loaded key from ${file.name}`, "success");
     };
 

@@ -284,115 +284,6 @@ input[type="number"] {
   margin-top: 2rem;
 }
 
-.visualization-section,
-.stats-section {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 3rem;
-  margin-bottom: 3rem;
-}
-
-.visualization-section h2,
-.stats-section h2 {
-  font-size: 1.25rem;
-  font-weight: 500;
-  color: var(--text-primary);
-  margin-bottom: 2rem;
-  text-align: left;
-}
-
-.visualization-container {
-  min-height: 200px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--bg-input);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  position: relative;
-}
-
-.round-display {
-  text-align: center;
-  padding: 2rem;
-}
-
-.round-info {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  font-family: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas,
-    "Courier New", monospace;
-}
-
-.feistel-round {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1.5rem;
-  margin: 1rem 0;
-}
-
-.data-block {
-  background: var(--bg-primary);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 1rem;
-  min-width: 80px;
-  text-align: center;
-  font-family: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas,
-    "Courier New", monospace;
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-}
-
-.function-box {
-  background: var(--accent);
-  color: var(--bg-primary);
-  border-radius: 4px;
-  padding: 0.5rem 1rem;
-  font-weight: 500;
-  font-size: 0.75rem;
-}
-
-.xor-symbol {
-  font-size: 1.25rem;
-  color: var(--text-secondary);
-  font-weight: normal;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 1.5rem;
-}
-
-.stat-item {
-  background: var(--bg-input);
-  padding: 1.5rem;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  text-align: left;
-}
-
-.stat-label {
-  display: block;
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-  text-transform: none;
-  letter-spacing: normal;
-}
-
-.stat-value {
-  font-size: 1.5rem;
-  font-weight: 300;
-  color: var(--text-primary);
-  font-family: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas,
-    "Courier New", monospace;
-}
-
 .processing {
   opacity: 0.6;
   cursor: not-allowed;
@@ -408,9 +299,7 @@ input[type="number"] {
     font-size: 2rem;
   }
 
-  .cipher-section,
-  .visualization-section,
-  .stats-section {
+  .cipher-section {
     padding: 2rem;
   }
 
@@ -420,10 +309,6 @@ input[type="number"] {
 
   .btn {
     width: 100%;
-  }
-
-  .stats-grid {
-    grid-template-columns: 1fr;
   }
 
   .notifications-container {
