@@ -16,6 +16,7 @@ class FeistelCipher {
       loadKey: document.getElementById("loadKeyBtn"),
       keyInput: document.getElementById("keyInput"),
       downloadBtn: document.getElementById("downloadBtn"),
+      avalancheBtn: document.getElementById("avalancheBtn"),
       notifications: document.getElementById("notifications"),
     };
 
@@ -36,6 +37,7 @@ class FeistelCipher {
     this.els.loadKey.onclick = () => this.els.keyInput.click();
     this.els.keyInput.onchange = (e) => this.handleKeyLoad(e);
     this.els.downloadBtn.onclick = () => this.handleDownload();
+    this.els.avalancheBtn.onclick = () => this.openAvalancheResearch();
 
     [this.els.encryptMode, this.els.decryptMode].forEach(
       (radio) => (radio.onchange = () => this.updateUI())
@@ -78,6 +80,8 @@ class FeistelCipher {
 
     if (!isEncrypt) {
       this.els.plaintext.placeholder = "Load file to decrypt...";
+      // Скрываем кнопку исследования лавинного эффекта в режиме дешифрования
+      document.querySelector(".avalanche-section").style.display = "none";
     }
   }
 
@@ -277,6 +281,11 @@ class FeistelCipher {
       const result = await this.processText(text, key, rounds, isEncrypt);
 
       this.els.result.value = result;
+
+      // Показываем кнопку исследования лавинного эффекта только после шифрования
+      if (isEncrypt) {
+        document.querySelector(".avalanche-section").style.display = "block";
+      }
     } catch (e) {
       this.showNotification("Error: " + e.message, "error");
     } finally {
@@ -313,6 +322,7 @@ class FeistelCipher {
     // this.els.encryptMode.checked = true;
     this.els.fileInput.value = "";
     this.els.keyInput.value = "";
+    document.querySelector(".avalanche-section").style.display = "none";
     this.updateUI();
   }
 
@@ -333,6 +343,12 @@ class FeistelCipher {
     this.els.loadFile.disabled = processing;
     this.els.loadKey.disabled = processing;
     this.els.downloadBtn.disabled = processing;
+
+    // Отключаем кнопку исследования, если она видима
+    const avalancheSection = document.querySelector(".avalanche-section");
+    if (avalancheSection && avalancheSection.style.display !== "none") {
+      this.els.avalancheBtn.disabled = processing;
+    }
   }
 
   createZvhFile(encryptedData, metadata) {
@@ -671,6 +687,22 @@ class FeistelCipher {
         }
       }, 300);
     }, 3000);
+  }
+
+  openAvalancheResearch() {
+    const params = new URLSearchParams({
+      text: this.els.plaintext.value,
+      key: this.els.key.value,
+      rounds: this.els.rounds.value,
+      functionType: this.currentFunctionType,
+    });
+
+    const basePath =
+      window.location.hostname === "koolhackerz.github.io"
+        ? "/InfoSec-Lab4/"
+        : "./";
+
+    window.open(`${basePath}avalanche.html?${params.toString()}`, "_blank");
   }
 }
 
