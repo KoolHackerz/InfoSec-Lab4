@@ -198,14 +198,10 @@ class FeistelCipher {
       return roundKey;
     } else {
       // б) функция має вигляд F(Vi, X) = S(X) ⊕ Vi
-      if (!leftPart) {
-        throw new Error("Left part required for complex F function");
-      }
-
-      const leftPadded = leftPart.padStart(32, "0").slice(0, 32);
+      const rightPadded = right.padStart(32, "0").slice(0, 32);
       const roundKeyPadded = roundKey.padStart(32, "0").slice(0, 32);
 
-      return this.xor(leftPadded, roundKeyPadded);
+      return this.xor(rightPadded, roundKeyPadded);
     }
   }
 
@@ -259,7 +255,7 @@ class FeistelCipher {
       left = left.padStart(32, "0").slice(0, 32);
       right = right.padStart(32, "0").slice(0, 32);
 
-      const f = this.fFunction(right, key, round, left);
+      const f = this.fFunction(right, key, round);
       const newLeft = right;
       const newRight = this.xor(left, f);
 
