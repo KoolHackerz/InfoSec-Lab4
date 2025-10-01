@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Feistel Network - Encryption/Decryption</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="notifications" class="notifications-container"></div>
+    <div class="container">
+      <header>
+        <h1 class="title">Feistel Network</h1>
+      </header>
+
+      <main>
+        <section class="cipher-section">
+          <div class="mode-selector">
+            <label class="mode-label">Mode</label>
+            <div class="mode-toggle">
+              <input
+                type="radio"
+                id="encryptMode"
+                name="mode"
+                value="encrypt"
+                checked
+              />
+              <label for="encryptMode" class="mode-option">Encrypt</label>
+              <input
+                type="radio"
+                id="decryptMode"
+                name="mode"
+                value="decrypt"
+              />
+              <label for="decryptMode" class="mode-option">Decrypt</label>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <div class="input-header">
+              <label for="plaintext">Text</label>
+              <button id="loadFileBtn" class="file-btn">Load File</button>
+              <input
+                type="file"
+                id="fileInput"
+                accept=".txt"
+                style="display: none"
+              />
+            </div>
+            <textarea
+              id="plaintext"
+              placeholder="Enter your text here"
+            ></textarea>
+          </div>
+
+          <div class="input-group">
+            <div class="input-header">
+              <label for="key">Key</label>
+              <button id="loadKeyBtn" class="file-btn">Load Key</button>
+              <input
+                type="file"
+                id="keyInput"
+                accept=".txt"
+                style="display: none"
+              />
+            </div>
+            <input type="text" id="key" placeholder="Enter encryption key" />
+          </div>
+
+          <div class="input-group">
+            <label for="rounds">Rounds</label>
+            <input type="number" id="rounds" min="1" max="16" value="4" />
+          </div>
+
+          <div class="input-group">
+            <label class="mode-label">F Function Type</label>
+            <div class="mode-toggle">
+              <input
+                type="radio"
+                id="functionSimple"
+                name="function"
+                value="simple"
+                checked
+              />
+              <label for="functionSimple" class="mode-option">F(Vi) = Vi</label>
+              <input
+                type="radio"
+                id="functionComplex"
+                name="function"
+                value="complex"
+              />
+              <label for="functionComplex" class="mode-option"
+                >F(Vi, X) = S(X) ⊕ Vi</label
+              >
+            </div>
+          </div>
+
+          <div class="controls">
+            <button id="processBtn" class="btn primary">Process</button>
+            <button id="clearBtn" class="btn clear">Clear</button>
+          </div>
+
+          <div class="output-section">
+            <div class="input-group">
+              <div class="input-header">
+                <label for="result">Result</label>
+                <button id="downloadBtn" class="file-btn">Download</button>
+              </div>
+              <textarea id="result" readonly></textarea>
+            </div>
+          </div>
+        </section>
+
+        <section class="visualization-section">
+          <h2>Process</h2>
+          <div id="visualization" class="visualization-container">
+            <div class="round-display">
+              <div class="round-info">Ready</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="stats-section">
+          <h2>Stats</h2>
+          <div class="stats-grid">
+            <div class="stat-item">
+              <span class="stat-label">Input</span>
+              <span class="stat-value" id="inputLength">0</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Output</span>
+              <span class="stat-value" id="outputLength">0</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Rounds</span>
+              <span class="stat-value" id="roundsUsed">4</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Time</span>
+              <span class="stat-value" id="processingTime">0ms</span>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
